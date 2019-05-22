@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">userstock</a> &gt; <a href="index.source.html" class="el_package">com.hcl.userstock.controller</a> &gt; <span class="el_source">StockController.java</span></div><h1>StockController.java</h1><pre class="source lang-java linenums">package com.hcl.userstock.controller;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.hcl.userstock.entity.UserStockdetails;
+import com.hcl.userstock.service.StockService;
+import com.hcl.userstock.service.StockServiceImpl;
+
+@RestController
+@RequestMapping(&quot;/stocksapp&quot;)
+<span class="fc" id="L26">public class StockController {</span>
+
+	@Autowired
+	private StockServiceImpl stockServiceImpl;
+
+	@GetMapping(&quot;/getmonthlyusers/{month}&quot;)
+	public List&lt;UserStockdetails&gt; getUsersOnMonthlyBasis(@PathVariable(&quot;month&quot;) int month) {
+<span class="nc" id="L33">		return stockServiceImpl.getMonthlyData(month);</span>
+
+	}
+
+	@GetMapping(&quot;/getdailyusers/{todaydate}&quot;)
+	public List&lt;UserStockdetails&gt; getDailyUsersStockDetails(@PathVariable(&quot;todaydate&quot;) String todaydate) {
+<span class="nc" id="L39">		return stockServiceImpl.getDaily(todaydate);</span>
+	}
+
+	@GetMapping(&quot;/getweeklyusers/{startdate}/{enddate}&quot;)
+	public List&lt;UserStockdetails&gt; getWeeklyUserStockDetails(@PathVariable(&quot;startdate&quot;) String startdate,
+			@PathVariable(&quot;enddate&quot;) String enddate) {
+<span class="nc" id="L45">		return stockServiceImpl.getWeekly(startdate, enddate);</span>
+
+	}
+
+	public static final String SAMPLE_XLSX_FILE_PATH = &quot;C:\\Users\\user1\\Desktop\\Test_Git\\userstock\\src\\main\\resources\\sample-xlsx-file.xlsx&quot;;
+
+	@Autowired
+	StockService service;
+
+	@GetMapping(value = &quot;docstocks&quot;)
+	public String readSaveStockDate() throws Exception {
+<span class="nc" id="L56">		String msg = &quot;Stock Date is read saved in DB&quot;;</span>
+<span class="nc" id="L57">		Workbook workbook = null;</span>
+<span class="nc" id="L58">		List&lt;UserStockdetails&gt; stockList = new ArrayList&lt;UserStockdetails&gt;();</span>
+		try {
+<span class="nc" id="L60">			workbook = WorkbookFactory.create(new File(SAMPLE_XLSX_FILE_PATH)); // Retrieving the number of</span>
+																							// sheets in the
+<span class="nc" id="L62">			Sheet sheet = (Sheet) workbook.getSheetAt(0);</span>
+
+<span class="nc" id="L64">			Iterator&lt;Row&gt; rowIterator = sheet.iterator();</span>
+<span class="nc" id="L65">			rowIterator.next();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			while (rowIterator.hasNext()) {</span>
+<span class="nc" id="L67">				UserStockdetails stock = new UserStockdetails();</span>
+<span class="nc" id="L68">				Row row = rowIterator.next();</span>
+<span class="nc" id="L69">				Cell cell0 = row.getCell(1);</span>
+<span class="nc" id="L70">				int userId = (int) cell0.getNumericCellValue();</span>
+<span class="nc" id="L71">				stock.setUserId(userId);</span>
+
+<span class="nc" id="L73">								Cell cell2 = row.getCell(2);</span>
+<span class="nc" id="L74">				int productId = (int) cell2.getNumericCellValue();</span>
+<span class="nc" id="L75">				stock.setProductId(productId);</span>
+
+<span class="nc" id="L77">				Cell cell3 = row.getCell(3);</span>
+<span class="nc" id="L78">				String productName = cell3.getStringCellValue();</span>
+<span class="nc" id="L79">				stock.setProductName(productName);</span>
+<span class="nc" id="L80">				Cell cell4 = row.getCell(4);</span>
+<span class="nc" id="L81">				int quantity = (int) cell4.getNumericCellValue();</span>
+<span class="nc" id="L82">				stock.setQuantity(quantity);</span>
+<span class="nc" id="L83">				Cell cell5 = row.getCell(5);</span>
+<span class="nc" id="L84">				double price = cell5.getNumericCellValue();</span>
+<span class="nc" id="L85">				stock.setPrice(price);</span>
+
+<span class="nc" id="L87">				Cell cell6 = row.getCell(5);</span>
+<span class="nc" id="L88">				Date dateTime = cell6.getDateCellValue();</span>
+<span class="nc" id="L89">				stock.setDateTime(dateTime);</span>
+<span class="nc" id="L90">				stockList.add(stock);</span>
+<span class="nc" id="L91">			}</span>
+<span class="nc" id="L92">			service.saveStock(stockList);</span>
+		}  finally {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">			if(workbook!=null) {</span>
+<span class="nc" id="L95">				workbook.close();</span>
+			}
+		}
+
+<span class="nc" id="L99">		return msg;</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.0.201801022044</span></div></body></html>

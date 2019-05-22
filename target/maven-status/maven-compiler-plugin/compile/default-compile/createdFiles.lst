@@ -1,0 +1,7 @@
+com\hcl\userstock\service\StockServiceImpl.class
+com\hcl\userstock\controller\StockController.class
+com\hcl\userstock\repository\StockRepository.class
+com\hcl\userstock\service\StockService.class
+com\hcl\userstock\UserstockApplication.class
+com\hcl\userstock\config\SwaggerConfig.class
+com\hcl\userstock\entity\UserStockdetails.class
