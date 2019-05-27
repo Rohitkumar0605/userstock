@@ -1,6 +1,8 @@
 package com.hcl.userstock.controller;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -11,12 +13,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.net.MediaType;
 import com.hcl.userstock.entity.UserStockdetails;
 import com.hcl.userstock.service.StockService;
 import com.hcl.userstock.service.StockServiceImpl;
@@ -34,9 +40,35 @@ public class StockController {
 
 	}
 
-	@GetMapping("/getdailyusers/{todaydate}")
-	public List<UserStockdetails> getDailyUsersStockDetails(@PathVariable("todaydate") String todaydate) {
-		return stockServiceImpl.getDaily(todaydate);
+	@GetMapping(value ="/getdailyusers/{todaydate}")
+	public String getDailyUsersStockDetails(@PathVariable("todaydate") String todaydate)
+			throws ParseException, JSONException {
+		
+		JSONArray json = new JSONArray();
+		//List<String> list = new ArrayList<String>();
+		
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			sdf.setLenient(false);
+			Date date = sdf.parse(todaydate);
+			
+			/* json.put("output", stockServiceImpl.getDaily(date)); */
+			json.put(stockServiceImpl.getDaily(date));
+			//list.add(stockServiceImpl.getDaily(date).toString());
+			
+		} catch (Exception e) {
+			json.put("date format is not correct");
+			//list.add("date format is not correct");
+		}
+
+
+		
+		return json.toString();
+		
+		//return list;
+
+		//return stockServiceImpl.getDaily(date);
+
 	}
 
 	@GetMapping("/getweeklyusers/{startdate}/{enddate}")
@@ -46,7 +78,7 @@ public class StockController {
 
 	}
 
-	public static final String SAMPLE_XLSX_FILE_PATH = "C:\\Users\\user1\\Desktop\\Test_Git\\userstock\\src\\main\\resources\\sample-xlsx-file.xlsx";
+	public static final String SAMPLE_XLSX_FILE_PATH = "C:\\Users\\rohit\\Desktop\\Test_git\\userstock\\src\\main\\resources\\sample-xlsx-file.xlsx";
 
 	@Autowired
 	StockService service;
@@ -58,7 +90,7 @@ public class StockController {
 		List<UserStockdetails> stockList = new ArrayList<UserStockdetails>();
 		try {
 			workbook = WorkbookFactory.create(new File(SAMPLE_XLSX_FILE_PATH)); // Retrieving the number of
-																							// sheets in the
+																				// sheets in the
 			Sheet sheet = (Sheet) workbook.getSheetAt(0);
 
 			Iterator<Row> rowIterator = sheet.iterator();
@@ -70,7 +102,7 @@ public class StockController {
 				int userId = (int) cell0.getNumericCellValue();
 				stock.setUserId(userId);
 
-								Cell cell2 = row.getCell(2);
+				Cell cell2 = row.getCell(2);
 				int productId = (int) cell2.getNumericCellValue();
 				stock.setProductId(productId);
 
@@ -90,8 +122,8 @@ public class StockController {
 				stockList.add(stock);
 			}
 			service.saveStock(stockList);
-		}  finally {
-			if(workbook!=null) {
+		} finally {
+			if (workbook != null) {
 				workbook.close();
 			}
 		}
